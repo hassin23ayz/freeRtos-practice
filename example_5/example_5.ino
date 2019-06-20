@@ -5,6 +5,8 @@ void vTaskFunction( void *pvParameters );
 static const char* pcTextForTask1 = "Task 1 is running\r\n";
 static const char* pcTextForTask2 = "Task 2 is running\r\n";
 
+volatile uint32_t ulIdleCycleCount = 0UL;
+
 void setup() {
   Serial.begin(9600);
   while (!Serial) {;}
@@ -50,7 +52,13 @@ void vTaskFunction(void *pvParameters)  // This is a task.
   for (;;)                    // A Task shall never return or exit.
   {
     Serial.println(pcTaskName);
+    Serial.println(ulIdleCycleCount);
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(250));
   }
   vTaskDelete(NULL);
+}
+
+void vApplicationIdleHook(void)
+{
+  ulIdleCycleCount++;
 }
