@@ -19,7 +19,8 @@ typedef enum
 
 typedef struct 
 {
-  char* dataPtr;
+  //char* dataPtr;
+  char data[32];
   EDataSource eDataSrc;
 }SData;
 
@@ -51,9 +52,12 @@ static void vSenderTask(void* pvParameters)
 {
   BaseType_t xStatus;
   SData gps1Data;
+  uint32_t thisVarWillNotIncrement = 575;
 
   gps1Data.eDataSrc = eGPS;
-  gps1Data.dataPtr = "dhaka,bangladesh";
+  //gps1Data.dataPtr = (char*) malloc(32*sizeof(char));
+  memset(gps1Data.data, '\0', 32);
+  snprintf(gps1Data.data, 32, "Dhaka, Bangladesh %d\r\n", thisVarWillNotIncrement++);
 
   for(;;)
   {    
@@ -85,7 +89,7 @@ static void vReceieverTask(void* pvParameters)
     if(xStatus == pdPASS)
     {
       Serial.println("receieved= ");
-      Serial.println(gpsRcvData.dataPtr);
+      Serial.println(gpsRcvData.data);
     }
     else
     {
