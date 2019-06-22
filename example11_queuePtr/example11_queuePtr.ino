@@ -52,15 +52,16 @@ static void vSenderTask(void* pvParameters)
 {
   BaseType_t xStatus;
   SData gps1Data;
-  uint32_t thisVarWillNotIncrement = 575;
-
   gps1Data.eDataSrc = eGPS;
-  //gps1Data.dataPtr = (char*) malloc(32*sizeof(char));
-  memset(gps1Data.data, '\0', 32);
-  snprintf(gps1Data.data, 32, "Dhaka, Bangladesh %d\r\n", thisVarWillNotIncrement++);
+
+  uint8_t thisVarWillIncrement = 0;
+  uint8_t thisVarWillNotIncrement = 127;
+  thisVarWillNotIncrement++;
 
   for(;;)
-  {    
+  { 
+    memset(gps1Data.data, '\0', 32);
+    snprintf(gps1Data.data, 32, "Bangladesh r:%d, h:%d\r\n", thisVarWillNotIncrement, thisVarWillIncrement++);   
     xStatus = xQueueSendToBack(xPointerQueue, &gps1Data, 0);
     //xStatus = xQueueSendToBack(xPointerQueue, &xDataCounter, portMAX_DELAY);
 
