@@ -37,7 +37,7 @@ void setup() {
 
   if(xMailBox != NULL)
   {
-    xTaskCreate(prvSenderTask,     "Sender",    1000, NULL, 1, NULL);
+    xTaskCreate(prvSenderTask,    "Sender",    1000, NULL, 1, NULL);
     xTaskCreate(prvReceieverTask, "Receiever", 1000, NULL, 1, NULL);
     vTaskStartScheduler();
   }
@@ -55,22 +55,15 @@ static void prvSenderTask(void* pvParameters)
   BaseType_t xStatus;
   SData xCanData;
   xCanData.eDataSrc = E_CAN;
-  uint8_t ucSpeed = 0;
+  uint32_t ulSpeed = 0;
 
   for(;;)
   { 
     xCanData.xTimeStamp = xTaskGetTickCount();
     memset(xCanData.cDataBuf, '\0', 32);
-    snprintf(xCanData.cDataBuf, 32, "speed:%d time:%ld", ucSpeed++, xCanData.xTimeStamp);
+    snprintf(xCanData.cDataBuf, 32, "speed:%ld time:%ld", ulSpeed++, xCanData.xTimeStamp);
 
     xStatus = xQueueOverwrite(xMailBox, &xCanData);
-
-    if(xStatus == pdPASS)
-    {
-      Serial.print("data sent to mailbox @");
-      Serial.println(xCanData.xTimeStamp);
-      Serial.println("---------------------------------");
-    }
   }
 }
 
@@ -78,19 +71,17 @@ static void prvReceieverTask(void* pvParameters)
 {
   BaseType_t xStatus;
   SData xCanRcvData;
+  TickType_t xPreviousTimeStamp = xTaskGetTickCount();
 
   for(;;)
   {
     xStatus = xQueuePeek(xMailBox, &xCanRcvData, portMAX_DELAY);
 
-    if(xStatus == pdPASS)
+    if(xCanRcvData.xTimeStamp > xPreviousTimeStamp)
     {
+      xPreviousTimeStamp = xCanRcvData.xTimeStamp;
       Serial.print("\n\rToyota Axio= ");
       Serial.println(xCanRcvData.cDataBuf);
-    }
-    else
-    {
-      Serial.println("could not receive from the mailbox , timeout");
     }
   }
 }
